@@ -55,45 +55,41 @@ def syllabifiable(word):
 
     return True
 
+def replace_iter(string, old, new):
+    if old not in string:
+        return string
+    else:
+        return replace_iter(string.replace(old, new), old, new)
+
 # Syllabifies a sequence of Cs and Vs
-def syllabify(word):
-    prev = "#"
-    syll = ""
+def syllabify(word, yes_onset=True, yes_coda=False, onset_over_coda=True):
+    word = replace_iter(word, "VV", "V.V")
+    word = replace_iter(word, "CCV", "C.CV")
 
-    rev = word[::-1]
 
-    for char in rev:
-        if prev == "#":
-            syll += "."
-            syll += char
-            prev = char
-        elif prev == "C" and char == "V":
-            syll += char
-            prev = char
-        elif prev == "V" and char == "C":
-            syll += char
-            syll += "."
-            prev = "."
-        elif prev == "V" and char == "V":
-            syll += "."
-            syll += char
-            prev = char
-        elif prev == ".":
-            syll += char
-            prev = char
-        else:
-            print(word)
+    if yes_onset and not yes_coda:
+        word = replace_iter(word, "VCV", "V.CV")
+    elif not yes_onset and yes_coda:
+        word = replace_iter(word, "VCV", "VC.V")
+    elif yes_onset and yes_coda and onset_over_coda:
+        word = replace_iter(word, "VCV", "V.CV")
+    elif yes_onset and yes_coda and not onset_over_coda:
+        word = replace_iter(word, "VCV", "VC.V")
+    elif not yes_onset and not yes_coda and onset_over_coda:
+        word = replace_iter(word, "VCV", "VC.V")
+    elif not yes_onset and not yes_coda and not onset_over_coda:
+        word = replace_iter(word, "VCV", "V.CV")
+    else:
+        print("SYLLABIFICATION ERROR")
 
-    syll = syll[::-1]
-    if len(syll) > 0:
-        if syll[0] == "V" or syll[0] == "C":
-            syll = "." + syll
+    if word != "":
+        word = "." + word + "."
 
-    return syll
+    return word
 
 # Counts how many times a pair of an underlying representation
 # and a surface representation violate each of the 4 constraints
-def violations(ur, sr):
+def violations(ur, sr, yes_onset=True, yes_coda=False):
     onset = 0
     nocoda = 0
     mx = 0
@@ -113,10 +109,19 @@ def violations(ur, sr):
             parts = syllable.split("V")
             ons = parts[0]
             cod = parts[1]
-            if ons == "":
-                onset += 1
-            if cod != "":
-                nocoda += 1
+            if yes_onset:
+                if ons == "":
+                    onset += 1
+            else:
+                if ons != "":
+                    onset += 1
+
+            if yes_coda:
+                if cod == "":
+                    nocoda += 1
+            else:
+                if cod != "":
+                    nocoda += 1
 
     # Max, Dep
     edit_paths, _ = edit_path(ur,sr.replace(".",""))
@@ -306,10 +311,10 @@ def min_cands(cands):
     
             
 # Determines the optimal output given an unput, a set of candidates, and a ranking
-def winner(ur, candidates, ranking):
+def winner(ur, candidates, ranking, yes_onset=True, yes_coda=False):
     all_violations = []
     for cand in candidates:
-        viols = violations(ur, cand)
+        viols = violations(ur, cand, yes_onset=yes_onset, yes_coda=yes_coda)
         for viol in viols:
             all_violations += [[cand, viol]] 
             
@@ -331,35 +336,111 @@ def winner(ur, candidates, ranking):
     return all_violations
 
 # Creates a phonology task
-def make_task(ranking, all_input_outputs, n_train=10, n_test=10, v_list=None, c_list=None):
+def make_task(ranking, all_input_outputs, n_train=10, n_dev=10, n_test=10, v_list=None, c_list=None):
     io_list = all_input_outputs[tuple(ranking)][:]
     shuffle(io_list)
     
     if v_list is None or c_list is None:
         v_list, c_list = phoneme_inventory()
 
-    train_pairs = []
-    test_pairs = []
+    large_pairs = []
+    small_pairs = []
+    med_pairs = []
    
-    train_dict = {}   
+    large_dict = {}  
+    small_dict = {}
+    med_dict = {}
 
-    for i in range(n_train):
-        abstract = random.choice(io_list)
-        train_pairs.append(output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2]))
-        
-    for elt in train_pairs:
-        train_dict[tuple(elt)] = 1
+    n_small, n_med, n_large = sorted([n_train, n_dev, n_test])
 
-    for i in range(n_test):
+    for i in range(n_small):
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
             candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in train_dict:
+            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict:
                 satisfied = True
-                test_pairs.append(candidate)
-        
-    return train_pairs, test_pairs, v_list, c_list
+                large_pairs.append(candidate)
+                large_dict[tuple(candidate)] = 1
+
+        satisfied = False
+        while not satisfied:
+            abstract = random.choice(io_list)
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
+            if tuple(candidate) not in large_dict and tuple(candidate) not in med_dict:
+                satisfied = True
+                small_pairs.append(candidate)
+                small_dict[tuple(candidate)] = 1
+
+
+        satisfied = False
+        while not satisfied:
+            abstract = random.choice(io_list)
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
+            if tuple(candidate) not in large_dict and tuple(candidate) not in small_dict:
+                satisfied = True
+                med_pairs.append(candidate)
+                med_dict[tuple(candidate)] = 1
+
+
+    for i in range(n_med - n_small):
+
+        satisfied = False
+        while not satisfied:
+            abstract = random.choice(io_list)
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
+            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict:
+                satisfied = True
+                large_pairs.append(candidate)
+                large_dict[tuple(candidate)] = 1
+
+        satisfied = False
+        while not satisfied:
+            abstract = random.choice(io_list)
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
+            if tuple(candidate) not in large_dict and tuple(candidate) not in small_dict:
+                satisfied = True
+                med_pairs.append(candidate)
+                med_dict[tuple(candidate)] = 1
+
+
+    for i in range(n_large - n_med):
+        satisfied = False
+        while not satisfied:
+            abstract = random.choice(io_list)
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
+            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict:
+                satisfied = True
+                large_pairs.append(candidate)
+                large_dict[tuple(candidate)] = 1
+
+    if n_train >= n_test and n_test >= n_dev:
+        train_pairs = large_pairs
+        test_pairs = med_pairs
+        dev_pairs = small_pairs
+    elif n_train >= n_dev and n_dev >= n_test:
+        train_pairs = large_pairs
+        dev_pairs = med_pairs
+        test_pairs = small_pairs
+    elif n_test >= n_train and n_train >= n_dev:
+        test_pairs = large_pairs
+        train_pairs = med_pairs
+        dev_pairs = small_pairs
+    elif n_test >= n_dev and n_dev >= n_train:
+        test_pairs = large_pairs
+        dev_pairs = med_pairs
+        train_pairs = small_pairs
+    elif n_dev >= n_train and n_train >= n_test:
+        dev_pairs = large_pairs
+        train_pairs = med_pairs
+        test_pairs = small_pairs
+    elif n_dev >= n_test and n_test >= n_train:
+        dev_pairs = large_pairs
+        test_pairs = med_pairs
+        train_pairs = small_pairs
+                                    
+
+    return train_pairs, dev_pairs, test_pairs, v_list, c_list, ranking
 
 # Creates a CV task
 def make_task_cv(ranking, all_input_outputs, n=10):

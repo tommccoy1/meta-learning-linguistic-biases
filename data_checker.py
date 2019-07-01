@@ -1,31 +1,109 @@
 
-# Sanity check to confirm that there is no overlap between
-# train, dev, and test sets
-
-fi1 = open("phonology.train", "r")
-fi2 = open("phonology.dev", "r")
-fi3 = open("phonology.test", "r")
-
-all_dict = {}
-
-for line in fi1:
-    parts = line.strip().split("\t")
-    parts[1] = ",".join(sorted(parts[1].split(",")))
-    parts[2] = ",".join(sorted(parts[2].split(",")))
-
-    full_key = "&".join([parts[1], parts[2]])
-
-    if full_key not in all_dict:
-        all_dict[full_key] = [parts[0]]
-    else:
-        #print(parts[0])
-        #print(all_dict[full_key])
-        #print("")
-
-        if parts[0] in all_dict[full_key]:
-            print("ERROR!!")
+from load_data import *
 
 
-        all_dict[full_key].append(parts[0])
-        
+
+fi_train = "phonology.train"
+fi_dev = "phonology.dev"
+fi_test = "phonology.test"
+
+train_set = load_dataset(fi_train)
+dev_set = load_dataset(fi_dev)
+test_set = load_dataset(fi_test)
+
+key_dict = {}
+
+for task in train_set:
+    key = tuple([tuple(x) for x in task[-1]])
+    if key in key_dict:
+        print("ERROR! REPEATED LANGUAGE!")
+    key_dict[key] = 1
+
+    train_inputs = [x[0] for x in task[0]]
+    train_inputs_dict = {}
+    for inp in train_inputs:
+        train_inputs_dict[inp] = 1
+
+    dev_inputs = [x[0] for x in task[1]]
+    dev_inputs_dict = {}
+    for inp in dev_inputs:
+        dev_inputs_dict[inp] = 1
+        if inp in train_inputs_dict:
+            print("TRAIN DEV OVERLAP!")
+
+    test_inputs = [x[0] for x in task[2]]
+    test_inputs_dict = {}
+    for inp in test_inputs:
+        test_inputs_dict[inp] = 1
+        if inp in train_inputs_dict:
+            print("TRAIN TEST OVERLAP!")
+        if inp in train_inputs_dict:
+            print("DEV TEST OVERLAP!")
+
+
+
+
+
+for task in dev_set:
+    key = tuple([tuple(x) for x in task[-1]])
+    if key in key_dict:
+        print("ERROR! REPEATED LANGUAGE!")
+    key_dict[key] = 1
+
+    train_inputs = [x[0] for x in task[0]]
+    train_inputs_dict = {}
+    for inp in train_inputs:
+        train_inputs_dict[inp] = 1
+
+    dev_inputs = [x[0] for x in task[1]]
+    dev_inputs_dict = {}
+    for inp in dev_inputs:
+        dev_inputs_dict[inp] = 1
+        if inp in train_inputs_dict:
+            print("TRAIN DEV OVERLAP!")
+
+    test_inputs = [x[0] for x in task[2]]
+    test_inputs_dict = {}
+    for inp in test_inputs:
+        test_inputs_dict[inp] = 1
+        if inp in train_inputs_dict:
+            print("TRAIN TEST OVERLAP!")
+        if inp in train_inputs_dict:
+            print("DEV TEST OVERLAP!")
+
+
+
+
+for task in test_set:
+    key = tuple([tuple(x) for x in task[-1]])
+    if key in key_dict:
+        print("ERROR! REPEATED LANGUAGE!")
+    key_dict[key] = 1
+
+    train_inputs = [x[0] for x in task[0]]
+    train_inputs_dict = {}
+    for inp in train_inputs:
+        train_inputs_dict[inp] = 1
+
+    dev_inputs = [x[0] for x in task[1]]
+    dev_inputs_dict = {}
+    for inp in dev_inputs:
+        dev_inputs_dict[inp] = 1
+        if inp in train_inputs_dict:
+            print("TRAIN DEV OVERLAP!")
+
+    test_inputs = [x[0] for x in task[2]]
+    test_inputs_dict = {}
+    for inp in test_inputs:
+        test_inputs_dict[inp] = 1
+        if inp in train_inputs_dict:
+            print("TRAIN TEST OVERLAP!")
+        if inp in train_inputs_dict:
+            print("DEV TEST OVERLAP!")
+
+
+
+
+
+
 
