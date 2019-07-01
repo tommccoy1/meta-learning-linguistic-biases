@@ -60,8 +60,8 @@ def train_model(model, task, max_epochs=10, lr=0.001, batch_size=100, print_ever
 
     training_set = batchify_list(task[0], batch_size=batch_size)
     dev_set = batchify_list(task[1], batch_size=batch_size)
-    test_set = batchify_list(task[1], batch_size=batch_size)
-    vocab = task[2]
+    test_set = batchify_list(task[2], batch_size=batch_size)
+    vocab = task[3]
 
     model.set_dicts(vocab)
     criterion = nn.NLLLoss(ignore_index=0)
@@ -117,8 +117,8 @@ def train_model(model, task, max_epochs=10, lr=0.001, batch_size=100, print_ever
 def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100):
     # This task's training set, test set, and vocab
     training_set = batchify_list(task[0], batch_size=batch_size)
-    test_set = batchify_list(task[1], batch_size=batch_size)
-    vocab = task[2]
+    test_set = batchify_list(task[2], batch_size=batch_size)
+    vocab = task[3]
 
     # Copy the model
     model_copy = model.create_copy(same_var=meta)
@@ -296,6 +296,26 @@ def average_acc(model, dataset, lr_inner=0.01, batch_size=100, train=True):
     average_acc = total_acc * 1.0 / len(dataset)
     
     return average_acc
+
+def average_acc_by_ranking(model, dataset, lr_inner=0.01, batch_size=100, train=True):
+    acc_dict = {}
+
+    for task in dataset:
+        ranking = tuple(task[-1][-1])
+        loss, acc, _ = fit_task(model, task, lr_inner=lr_inner, meta=False, batch_size=batch_size, train=train)
+        if ranking not in acc_dict:
+            acc_dict[ranking] = [0,0]
+
+        acc_dict[ranking][0] += acc
+        acc_dict[ranking][1] += 1
+
+    avg_acc_list = []
+
+    for key in acc_dict:
+        avg_acc_list.append([key, acc_dict[key][0] / acc_dict[key][1]])
+
+    return avg_acc_list
+
 
 
 

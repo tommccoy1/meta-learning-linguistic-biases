@@ -213,7 +213,7 @@ def edit_steps(end_pt,grid):
 # inp is CVCV-format
 # outp is CVCV-format
 # returns both in phonemes
-def output_string(inp, outp, v_list, c_list, steps=None):
+def output_string(inp, outp, v_list, c_list, steps=None, change_one=False, change_all=False):
     
     outp_no_periods = outp.replace(".", "")
     
@@ -229,6 +229,10 @@ def output_string(inp, outp, v_list, c_list, steps=None):
             inp_phonemes.append(random.choice(v_list))
     
     inp_word = "".join(inp_phonemes)
+    if change_one:
+        inp_word = replace_one(inp_word, v_list, c_list)
+    elif change_all:
+        inp_word = replace_all(inp_word, v_list, c_list)
     
     outp_phonemes = []
     indi = 0
@@ -318,7 +322,9 @@ def winner(ur, candidates, ranking, yes_onset=True, yes_coda=False):
         for viol in viols:
             all_violations += [[cand, viol]] 
             
-    for constraint in ranking:
+    for constraint in ranking
+else:
+    large_pairs.append([candidate[0], candidate[1].replace(".", "")]):
         min_viols = 1000000
         for candidate in all_violations:
             #print(all_violations, candidate)
@@ -336,7 +342,7 @@ def winner(ur, candidates, ranking, yes_onset=True, yes_coda=False):
     return all_violations
 
 # Creates a phonology task
-def make_task(ranking, all_input_outputs, n_train=10, n_dev=10, n_test=10, v_list=None, c_list=None):
+def make_task(ranking, all_input_outputs, n_train=10, n_dev=10, n_test=10, v_list=None, c_list=None, periods=True, input_filter=None, output_filter=None, abstract_input_filter=None, abstract_output_filter=None, replace_one_small=False, replace_one_med=False, replace_one_large=False, replace_all_small=False, replace_all_med=False, replace_all_large=False):
     io_list = all_input_outputs[tuple(ranking)][:]
     shuffle(io_list)
     
@@ -357,29 +363,38 @@ def make_task(ranking, all_input_outputs, n_train=10, n_dev=10, n_test=10, v_lis
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
-            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict:
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2], change_one=replace_one_large, change_all=replace_all_large)
+            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict and abstract_input_filter(abstract[0]) and abstract_output_filter(abstract[1].replace(".", "")) and input_filter(candidate[0]) and output_filter(candidate[1].replace(".", "")):
                 satisfied = True
-                large_pairs.append(candidate)
+                if periods:
+                    large_pairs.append(candidate)
+                else:
+                    large_pairs.append([candidate[0], candidate[1].replace(".", "")])
                 large_dict[tuple(candidate)] = 1
 
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
-            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in large_dict and tuple(candidate) not in med_dict:
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2], change_one=replace_one_small, change_all=replace_all_small)
+            if tuple(candidate) not in large_dict and tuple(candidate) not in med_dict and abstract_input_filter(abstract[0]) and abstract_output_filter(abstract[1].replace(".", "")) and input_filter(candidate[0]) and output_filter(candidate[1].replace(".", "")):
                 satisfied = True
-                small_pairs.append(candidate)
+                if periods:
+                    small_pairs.append(candidate)
+                else:
+                    small_pairs.append([candidate[0], candidate[1].replace(".", "")])
                 small_dict[tuple(candidate)] = 1
 
 
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
-            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in large_dict and tuple(candidate) not in small_dict:
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2], change_one=replace_one_med, change_all=replace_all_med)
+            if tuple(candidate) not in large_dict and tuple(candidate) not in small_dict and abstract_input_filter(abstract[0]) and abstract_output_filter(abstract[1].replace(".", "")) and input_filter(candidate[0]) and output_filter(candidate[1].replace(".", "")):
                 satisfied = True
-                med_pairs.append(candidate)
+                if periods:
+                    med_pairs.append(candidate)
+                else:
+                    med_pairs.append([candidate[0], candidate[1].replace(".", "")])
                 med_dict[tuple(candidate)] = 1
 
 
@@ -388,19 +403,25 @@ def make_task(ranking, all_input_outputs, n_train=10, n_dev=10, n_test=10, v_lis
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
-            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict:
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2], change_one=replace_one_large, change_all=replace_all_large)
+            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict and abstract_input_filter(abstract[0]) and abstract_output_filter(abstract[1].replace(".", "")) and input_filter(candidate[0]) and output_filter(candidate[1].replace(".", "")):
                 satisfied = True
-                large_pairs.append(candidate)
+                if periods:
+                    large_pairs.append(candidate)
+                else:
+                    large_pairs.append([candidate[0], candidate[1].replace(".", "")])
                 large_dict[tuple(candidate)] = 1
 
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
-            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in large_dict and tuple(candidate) not in small_dict:
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2], change_one=replace_one_med, change_all=replace_all_med)
+            if tuple(candidate) not in large_dict and tuple(candidate) not in small_dict and abstract_input_filter(abstract[0]) and abstract_output_filter(abstract[1].replace(".", "")) and input_filter(candidate[0]) and output_filter(candidate[1].replace(".", "")):
                 satisfied = True
-                med_pairs.append(candidate)
+                if periods:
+                    med_pairs.append(candidate)
+                else:
+                    med_pairs.append([candidate[0], candidate[1].replace(".", "")])
                 med_dict[tuple(candidate)] = 1
 
 
@@ -408,10 +429,13 @@ def make_task(ranking, all_input_outputs, n_train=10, n_dev=10, n_test=10, v_lis
         satisfied = False
         while not satisfied:
             abstract = random.choice(io_list)
-            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2])
-            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict:
+            candidate = output_string(abstract[0],abstract[1], v_list, c_list, steps=abstract[2], change_one=replace_one_large, change_all=replace_all_large)
+            if tuple(candidate) not in small_dict and tuple(candidate) not in med_dict and abstract_input_filter(abstract[0]) and abstract_output_filter(abstract[1].replace(".", "")) and input_filter(candidate[0]) and output_filter(candidate[1].replace(".", "")):
                 satisfied = True
-                large_pairs.append(candidate)
+                if periods:
+                    large_pairs.append(candidate)
+                else:
+                    large_pairs.append([candidate[0], candidate[1].replace(".", "")])
                 large_dict[tuple(candidate)] = 1
 
     if n_train >= n_test and n_test >= n_dev:
@@ -453,9 +477,44 @@ def make_task_cv(ranking, all_input_outputs, n=10):
        
     return train_pairs, test_pairs, vocab
     
-    
+def replace_one(inp, v_list, c_list):
+    vowels = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U']
+    consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z']
 
+    index = random.choice([x for x in range(len(inp))])
+    satisfied = False
+    while not satisfied:
+        if inp[index] in vowels:
+            new_segment = random.choice(vowels)
 
+            if new_segment not in v_list:
+                inp[index] = new_segment
+                satisfied = True
+        else:
+            new_segment = random.choice(consonants)
+            if new_segment not in c_list:
+                inp[index] = new_segment
+                satisfied = True
+    return inp
 
+def replace_all(inp, v_list, c_list):
+    vowels = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U']
+    consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z']
+
+    for index in range(len(inp)):
+        satisfied = False
+        while not satisfied:
+            if inp[index] in vowels:
+                new_segment = random.choice(vowels)
+
+                if new_segment not in v_list:
+                    inp[index] = new_segment
+                    satisfied = True
+            else:
+                new_segment = random.choice(consonants)
+                if new_segment not in c_list:
+                    inp[index] = new_segment
+                    satisfied = True
+    return inp
 
 

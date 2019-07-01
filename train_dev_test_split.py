@@ -14,6 +14,7 @@ parser.add_argument("--n_vowels_max", help="maximum number of vowels per languag
 parser.add_argument("--n_consonants_min", help="minimum number of consonants per language", type=int, default=2)
 parser.add_argument("--n_consonants_max", help="maximum number of consonats per language", type=int, default=4)
 parser.add_argument("--output_prefix", help="prefix for the output files", type=str, default="phonology")
+parser.add_argument("--rankings", help="set of rankings to consider", type=str, default=None)
 args = parser.parse_args()
 
 
@@ -27,6 +28,45 @@ rankings = [
     [1,2,3,0],
     [1,3,2,0]
 ]
+
+if args.rankings is not None:
+    rankings = [
+        [0,1,2,3],
+        [0,1,3,2],
+        [0,2,1,3],
+        [0,2,3,1],
+        [0,3,1,2],
+        [0,3,2,1],
+        [1,0,2,3],
+        [1,0,3,2],
+        [1,2,0,3],
+        [1,2,3,0],
+        [1,3,0,2],
+        [1,3,2,0],
+        [2,1,0,3],
+        [2,1,3,0],
+        [2,0,1,3],
+        [2,0,3,1],
+        [2,3,1,0],
+        [2,3,0,1],
+        [3,1,2,0],
+        [3,1,0,2],
+        [3,2,1,0],
+        [3,2,0,1],
+        [3,0,1,2],
+        [3,0,2,1]
+    ]
+
+    indices = [int(x) for x in args.rankings.split(",")]
+    new_rankings = []
+
+    for index, ranking in rankings:
+        if index in indices:
+            new_rankings.append(ranking)
+
+    rankings = new_rankings
+
+
 
 vowels = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U']
 consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z']
