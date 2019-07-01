@@ -322,9 +322,7 @@ def winner(ur, candidates, ranking, yes_onset=True, yes_coda=False):
         for viol in viols:
             all_violations += [[cand, viol]] 
             
-    for constraint in ranking
-else:
-    large_pairs.append([candidate[0], candidate[1].replace(".", "")]):
+    for constraint in ranking:
         min_viols = 1000000
         for candidate in all_violations:
             #print(all_violations, candidate)
