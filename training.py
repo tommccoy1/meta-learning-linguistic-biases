@@ -110,11 +110,39 @@ def train_model(model, task, max_epochs=10, lr=0.001, batch_size=100, print_ever
  
     return epoch * len(training_set) * batch_size + i * batch_size, best_dev_acc
 
+
 # Fit a model to a task (i.e., perform one inner loop)
+# task: A tuple of (training_set, test_set, vocab).
 # meta: True if this is being called as part of metatraining; False otherwise
 # lr_inner: learning rate
-# batch_size: the batch size
-def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100):
+# batch_size: the batch size to use in each inner iteration.
+# num_updates: the number of inner loop updates.
+# first_order: remove second-order gradient terms from the meta-objective to make meta-training faster; equivalent to the meta-optimzier assuming the loss is piecewise linear.
+# inner_optimizer: one of 'batch-gd' or 'sgd'; the optimization strategy to employ in the inner loop.
+#   'batch-gd': For each iterate in the inner loop, compute the gradient using the entire task-specific dataset.
+#   'sgd': For each iterate in the inner loop, compute the gradient a single (batch-sized) sample entire task-specific dataset; technically "minibatch sgd".
+def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100, num_updates=1, first_order=True, inner_optimizer='batch-gd'):
+
+    # Perform an optimizer update of named_params using loss.
+    def _update_step(loss, named_params):
+
+        # Backprop the loss; setting create_graph as True enables 
+        # second-order gradients for MAML
+        batch_loss.backward(create_graph=meta, retain_graph=not first_order)
+
+        """
+        if meta:
+          model_copy.set_param(name, param - lr_inner * grad)
+        else:
+          model_copy.set_param(name, (param - lr_inner * grad).data.requires_grad_())
+        """
+
+        return [
+            (name, param - lr_inner * param.grad) 
+            for name, param in named_params 
+            if param.grad  # Otherwise, '' is the input
+        ]
+
     # This task's training set, test set, and vocab
     training_set = batchify_list(task[0], batch_size=batch_size)
     test_set = batchify_list(task[2], batch_size=batch_size)
@@ -128,32 +156,27 @@ def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100)
     # don't compute loss for the padded parts)
     criterion = nn.NLLLoss(ignore_index=0)
 
-
-    # Training
+    # Inner loop training.
     if train:
-        for batch in training_set:
-            
-            # Compute the loss on this batch
-            batch_loss, batch_correct, batch_total = get_loss(model_copy, batch, criterion)
+        if inner_optimizer == 'sgd':
+            training_set.shuffle()  # Permute batches.
+            for j in range(num_updates):
+                # Criterion is the loss on a single batch.
+                batch_loss, _, _ = get_loss(model_copy, training_set[j], criterion)
+                updated_params = update_step(batch_loss, model_copy.named_params())
+                [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
 
-            # Backprop the loss; setting create_graph as True enables 
-            # double gradients for MAML
-            batch_loss.backward(create_graph=meta, retain_graph=True)
+        elif inner_optimizer == 'batch-gd':
+            for j in range(num_updates):
+                # Criterion is the average loss on a all batches in training set.
+                batch_losses = [get_loss(model_copy, batch, criterion) for batch in training_set]
+                total_loss = sum(batch_losses) / len_batch_losses
+                updated_params = update_step(total_loss, model_copy.named_params())
+                [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
 
-            # Update the model's parameters
-            for name, param in model_copy.named_params():
-                grad = param.grad
-                
-                # This is to deal with cases where '' is the input
-                if grad is None:
-                    continue
-                
-                if meta:
-                    model_copy.set_param(name, param - lr_inner * grad)
-                else:
-                    model_copy.set_param(name, (param - lr_inner * grad).data.requires_grad_())
-                
-                
+        else:
+            raise NotImplementedError
+
     # Testing
     test_correct = 0
     test_total = 0
