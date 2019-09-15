@@ -121,14 +121,13 @@ def train_model(model, task, max_epochs=10, lr=0.001, batch_size=100, print_ever
 # inner_optimizer: one of 'batch-gd' or 'sgd'; the optimization strategy to employ in the inner loop.
 #   'batch-gd': For each iterate in the inner loop, compute the gradient using the entire task-specific dataset.
 #   'sgd': For each iterate in the inner loop, compute the gradient a single (batch-sized) sample entire task-specific dataset; technically "minibatch sgd".
-def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100, num_updates=1, first_order=True, inner_optimizer='batch-gd'):
+def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100, num_updates=1, first_order=False, inner_optimizer='batch-gd'):
 
     # Perform an optimizer update of named_params using loss.
     def _update_step(loss, named_params):
 
-        # Backprop the loss; setting create_graph as True enables 
-        # second-order gradients for MAML
-        batch_loss.backward(create_graph=meta, retain_graph=not first_order)
+        # Backprop the loss; setting create_graph and retain_graph as True enables second-order gradients for MAML
+        batch_loss.backward(create_graph=not first_order, retain_graph=not first_order)
 
         """
         if meta:
@@ -163,15 +162,15 @@ def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100,
             for j in range(num_updates):
                 # Criterion is the loss on a single batch.
                 batch_loss, _, _ = get_loss(model_copy, training_set[j], criterion)
-                updated_params = update_step(batch_loss, model_copy.named_params())
+                updated_params = _update_step(batch_loss, model_copy.named_params())
                 [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
 
         elif inner_optimizer == 'batch-gd':
             for j in range(num_updates):
                 # Criterion is the average loss on a all batches in training set.
                 batch_losses = [get_loss(model_copy, batch, criterion) for batch in training_set]
-                total_loss = sum(batch_losses) / len_batch_losses
-                updated_params = update_step(total_loss, model_copy.named_params())
+                total_loss = sum(batch_losses) / len(batch_losses)
+                updated_params = _update_step(total_loss, model_copy.named_params())
                 [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
 
         else:
