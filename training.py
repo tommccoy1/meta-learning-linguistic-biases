@@ -128,7 +128,7 @@ def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100,
 
         # Backprop the loss; setting retain_graph as True enables second-order gradients for MAML.
         names, params = zip(*named_params_)
-        grads = torch.autograd.grad(loss_, params, create_graph=meta, retain_graph=True)
+        grads = torch.autograd.grad(loss_, params, create_graph=meta, retain_graph=not first_order)
 
         return [
             (name, param - lr_inner * grad) if meta
