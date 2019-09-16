@@ -116,7 +116,7 @@ def train_model(model, task, max_epochs=10, lr=0.001, batch_size=100, print_ever
 # meta: True if this is being called as part of metatraining; False otherwise
 # lr_inner: learning rate
 # batch_size: the batch size to use in each inner iteration.
-# num_updates: the number of inner loop updates.
+# num_updates: the number of inner loop updates (i.e., the number of times the parameters are updated).
 # first_order: remove second-order gradient terms from the meta-objective to make meta-training faster; equivalent to the meta-optimzier assuming the loss is piecewise linear.
 # inner_optimizer: one of 'batch-gd' or 'sgd'; the optimization strategy to employ in the inner loop.
 #   'batch-gd': For each iterate in the inner loop, compute the gradient using the entire task-specific dataset.
@@ -124,28 +124,23 @@ def train_model(model, task, max_epochs=10, lr=0.001, batch_size=100, print_ever
 def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100, num_updates=1, first_order=False, inner_optimizer='batch-gd'):
 
     # Perform an optimizer update of named_params using loss.
-    def _update_step(loss, named_params):
+    def _update_step(loss_, named_params_):
 
-        # Backprop the loss; setting create_graph and retain_graph as True enables second-order gradients for MAML
-        batch_loss.backward(create_graph=not first_order, retain_graph=not first_order)
-
-        """
-        if meta:
-          model_copy.set_param(name, param - lr_inner * grad)
-        else:
-          model_copy.set_param(name, (param - lr_inner * grad).data.requires_grad_())
-        """
+        # Backprop the loss; setting retain_graph as True enables second-order gradients for MAML.
+        names, params = zip(*named_params_)
+        grads = torch.autograd.grad(loss_, params, create_graph=meta, retain_graph=True)
 
         return [
-            (name, param - lr_inner * param.grad) 
-            for name, param in named_params 
-            if param.grad  # Otherwise, '' is the input
+            (name, param - lr_inner * grad) if meta
+            else (name, (param - lr_inner * grad).data.requires_grad_())
+            for name, param, grad in zip(names, params, grads)
         ]
+
 
     # This task's training set, test set, and vocab
     training_set = batchify_list(task[0], batch_size=batch_size)
-    test_set = batchify_list(task[2], batch_size=batch_size)
-    vocab = task[3]
+    test_set = batchify_list(task[1], batch_size=batch_size)
+    vocab = task[2]
 
     # Copy the model
     model_copy = model.create_copy(same_var=meta)
@@ -157,21 +152,29 @@ def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100,
 
     # Inner loop training.
     if train:
+        updated_params = model_copy.named_params()
         if inner_optimizer == 'sgd':
-            training_set.shuffle()  # Permute batches.
+            assert len(training_set) >= num_updates, "Must have more batches than updates for SGD."
+            np.random.shuffle(training_set)  # Permute batches.
             for j in range(num_updates):
                 # Criterion is the loss on a single batch.
                 batch_loss, _, _ = get_loss(model_copy, training_set[j], criterion)
-                updated_params = _update_step(batch_loss, model_copy.named_params())
+                updated_params = _update_step(batch_loss, updated_params)
                 [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
 
         elif inner_optimizer == 'batch-gd':
-            for j in range(num_updates):
+            for _ in range(num_updates):
                 # Criterion is the average loss on a all batches in training set.
-                batch_losses = [get_loss(model_copy, batch, criterion) for batch in training_set]
-                total_loss = sum(batch_losses) / len(batch_losses)
-                updated_params = _update_step(total_loss, model_copy.named_params())
+                total_loss = 0
+                total_count = 0
+                for batch in training_set:
+                    batch_loss, _, batch_count = get_loss(model_copy, batch, criterion)
+                    total_loss += batch_loss * batch_count
+                    total_count += batch_count
+                average_loss = total_loss / total_count
+                updated_params = _update_step(average_loss, updated_params)
                 [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
+                print(average_loss)
 
         else:
             raise NotImplementedError
@@ -209,7 +212,7 @@ def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100,
 # print_every = number of outer loop iterations to go through (specifically, the number of tasks, not the number of batches) before printing the dev set accuracy
 # patience = number of dev set evaluations to allow without any improvement before early stopping
 # save_prefix = prefix of the filename where the weights will be saved
-def transfer(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, inner_batch_size=100, print_every=100, patience=10, save_prefix="model"):
+def transfer(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, inner_batch_size=100, num_updates=1, first_order=False, inner_optimizer='batch-gd', print_every=100, patience=10, save_prefix="model"):
     done = False
     count_since_improved = 0
     best_dev_acc = 0.0
@@ -222,11 +225,11 @@ def transfer(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, inner_batc
         for i, t in enumerate(train_set):
             
             # Get the loss for one training task
-            _, _, model = fit_task(model, t, meta=False, lr_inner=lr_inner, batch_size=inner_batch_size)
+            _, _, model = fit_task(model, t, meta=False, lr_inner=lr_inner, batch_size=inner_batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer)
 
             # Evaluate on the dev set
             if i % print_every == 0:
-                dev_acc = average_acc(model, dev_set, lr_inner=lr_inner, batch_size=inner_batch_size)
+                dev_acc = average_acc(model, dev_set, lr_inner=lr_inner, batch_size=inner_batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer)
                 print("Dev accuracy at iteration " + str(i) + ":", dev_acc)
 
                 # Determine whether to early stop
@@ -257,7 +260,7 @@ def transfer(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, inner_batc
 # print_every = number of outer loop iterations to go through (specifically, the number of tasks, not the number of batches) before printing the dev set accuracy
 # patience = number of dev set evaluations to allow without any improvement before early stopping
 # save_prefix = prefix of the filename where the weights will be saved
-def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001, outer_batch_size=1, inner_batch_size=100, print_every=100, patience=10, save_prefix="model"):
+def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001, outer_batch_size=1, inner_batch_size=100, num_updates=1, first_order=False, inner_optimizer='batch-gd', print_every=100, patience=10, save_prefix="model"):
     optimizer = torch.optim.Adam(model.params(), lr=lr_outer)
     done = False
     count_since_improved = 0
@@ -271,7 +274,7 @@ def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001
         for i, t in enumerate(train_set):
             
             # Get the loss for one training task
-            task_loss, task_acc, _ = fit_task(model, t, meta=True, lr_inner=lr_inner, batch_size=inner_batch_size)
+            task_loss, task_acc, _ = fit_task(model, t, meta=True, lr_inner=lr_inner, batch_size=inner_batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer)
             test_loss += task_loss
             
             # Compute the gradient on the test loss, backpropagate it, and update the model's weights
@@ -288,8 +291,8 @@ def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001
                 test_loss = 0
                 
             # Evaluate on the dev set
-            if i % print_every == 0:
-                dev_acc = average_acc(model, dev_set, lr_inner=lr_inner, batch_size=inner_batch_size)
+            if False:#i % print_every == 1:
+                dev_acc = average_acc(model, dev_set, lr_inner=lr_inner, batch_size=inner_batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer)
                 print("Dev accuracy at iteration " + str(i) + ":", dev_acc)
 
                 # Determine whether to early stop
@@ -308,23 +311,23 @@ def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001
                     break
                
 # Compute the average accuracy across all tasks in a dataset (e.g. the dev set)
-def average_acc(model, dataset, lr_inner=0.01, batch_size=100, train=True):
+def average_acc(model, dataset, lr_inner=0.01, batch_size=100, num_updates=1, first_order=False, inner_optimizer='batch-gd', train=True):
     total_acc = 0
 
     for task in dataset:
-        loss, acc, _ = fit_task(model, task, lr_inner=lr_inner, meta=False, batch_size=batch_size, train=train)
+        loss, acc, _ = fit_task(model, task, lr_inner=lr_inner, meta=False, batch_size=batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer, train=train)
         total_acc += acc
 
     average_acc = total_acc * 1.0 / len(dataset)
     
     return average_acc
 
-def average_acc_by_ranking(model, dataset, lr_inner=0.01, batch_size=100, train=True):
+def average_acc_by_ranking(model, dataset, lr_inner=0.01, batch_size=100, num_updates=1, first_order=False, inner_optimizer='batch-gd', train=True):
     acc_dict = {}
 
     for task in dataset:
         ranking = tuple(task[-1][-1])
-        loss, acc, _ = fit_task(model, task, lr_inner=lr_inner, meta=False, batch_size=batch_size, train=train)
+        loss, acc, _ = fit_task(model, task, lr_inner=lr_inner, meta=False, batch_size=batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer, train=train)
         if ranking not in acc_dict:
             acc_dict[ranking] = [0,0]
 

@@ -19,15 +19,31 @@ test_set = load_dataset_cv("cv.test")
 cv_model = EncoderDecoder(6,6,10,128)
 
 # Meta-train the model
-maml(cv_model, train_set, dev_set, outer_batch_size=1, lr_inner=1.0,
-     print_every=1000, patience=2, save_prefix="cv_model")
+maml(cv_model,
+     train_set,
+     dev_set,
+     outer_batch_size=1,
+     inner_batch_size=2,
+     num_updates=10,
+     first_order=False,
+     inner_optimizer='sgd',
+     lr_inner=1.0,
+     print_every=1000, 
+     patience=2, 
+     save_prefix="cv_model")
 
 # Load the saved model
 loaded_model = EncoderDecoder(6,6,10,128)
 loaded_model.load_state_dict(torch.load("cv_model.weights"))
 
 # Evaluate it on the test set
-test_acc = average_acc(loaded_model, test_set, lr_inner=0.01, batch_size=100)
+test_acc = average_acc(loaded_model,
+                       test_set,
+                       lr_inner=0.01,
+                       batch_size=100,
+                       num_updates=10,
+                       first_order=False,
+                       inner_optimizer='batch-gd')
 print("Test accuracy:", test_acc)
 
 
