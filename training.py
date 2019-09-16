@@ -174,7 +174,6 @@ def fit_task(model, task, meta=False, train=True, lr_inner=0.01, batch_size=100,
                 average_loss = total_loss / total_count
                 updated_params = _update_step(average_loss, updated_params)
                 [model_copy.set_param(name, updated_param) for name, updated_param in updated_params]
-                print(average_loss)
 
         else:
             raise NotImplementedError
@@ -291,7 +290,7 @@ def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001
                 test_loss = 0
                 
             # Evaluate on the dev set
-            if False:#i % print_every == 1:
+            if i % print_every == 1:
                 dev_acc = average_acc(model, dev_set, lr_inner=lr_inner, batch_size=inner_batch_size, num_updates=num_updates, first_order=first_order, inner_optimizer=inner_optimizer)
                 print("Dev accuracy at iteration " + str(i) + ":", dev_acc)
 
