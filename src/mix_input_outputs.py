@@ -40,7 +40,7 @@ io_dict_list = [load_io(io_file) for io_file in io_file_list]
 new_io = create_input_output_list(io_dict_list)
 
 
-fo = open(args.prefix + "mixed_io_correspondences.txt", "w")
+fo = open("../io_correspondences/" + args.prefix + "mixed_io_correspondences.txt", "w")
 
 for key in all_input_outputs:
     key_string = ",".join([str(x) for x in key])

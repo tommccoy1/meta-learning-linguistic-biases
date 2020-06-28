@@ -11,9 +11,9 @@ parser.add_argument("--n_train", help="number of training examples to generate p
 parser.add_argument("--ranking_prefix", help="prefix for the output files", type=str, default="cv")
 args = parser.parse_args()
 
-train_lang_list = load_languages("phonology.train_keys")
-dev_lang_list = load_languages("phonology.dev_keys")
-test_lang_list = load_languages("phonology.test_keys")
+train_lang_list = load_languages("cv.train_keys")
+dev_lang_list = load_languages("cv.dev_keys")
+test_lang_list = load_languages("cv.test_keys")
 
 all_input_outputs = load_io("input_output_correspondences.txt")
 
@@ -21,9 +21,9 @@ train_set = []
 dev_set = []
 test_set = []
 
-fo_train = open(args.ranking_prefix + ".train", "w")
-fo_dev = open(args.ranking_prefix + ".dev", "w")
-fo_test = open(args.ranking_prefix + ".test", "w")
+fo_train = open("../data/" + args.ranking_prefix + ".train", "w")
+fo_dev = open("../data/" + args.ranking_prefix + ".dev", "w")
+fo_test = open("../data/" + args.ranking_prefix + ".test", "w")
 
 for elt in train_lang_list:
     ranking = elt[0]

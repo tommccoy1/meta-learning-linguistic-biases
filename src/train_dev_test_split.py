@@ -128,9 +128,9 @@ dev_set = list_languages[args.n_train:args.n_train + args.n_dev]
 test_set = list_languages[args.n_train + args.n_dev:]
 
 # Save the languages
-fo_train = open(args.output_prefix + ".train_keys", "w")
-fo_dev = open(args.output_prefix + ".dev_keys", "w")
-fo_test = open(args.output_prefix + ".test_keys", "w")
+fo_train = open("../data/" + args.output_prefix + ".train_keys", "w")
+fo_dev = open("../data/" + args.output_prefix + ".dev_keys", "w")
+fo_test = open("../data/" + args.output_prefix + ".test_keys", "w")
 
 for train_lang in train_set:
     fo_train.write("\t".join([",".join([str(x) for x in elt]) for elt in train_lang]) + "\n")

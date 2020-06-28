@@ -327,13 +327,13 @@ if not periods:
 
 
 if args.output_prefix is None:
-    fo_train = open(args.ranking_prefix + ".train", "w")
-    fo_dev = open(args.ranking_prefix + ".dev", "w")
-    fo_test = open(args.ranking_prefix + ".test", "w")
+    fo_train = open("../data/" + args.ranking_prefix + ".train", "w")
+    fo_dev = open("../data/" + args.ranking_prefix + ".dev", "w")
+    fo_test = open("../data/" + args.ranking_prefix + ".test", "w")
 else:
-    fo_train = open(args.output_prefix + ".train", "w")
-    fo_dev = open(args.output_prefix + ".dev", "w")
-    fo_test = open(args.output_prefix + ".test", "w")
+    fo_train = open("../data/" + args.output_prefix + ".train", "w")
+    fo_dev = open("../data/" + args.output_prefix + ".dev", "w")
+    fo_test = open("../data/" + args.output_prefix + ".test", "w")
 
 for index, elt in enumerate(train_lang_list):
     if args.n_train_tasks is not None:

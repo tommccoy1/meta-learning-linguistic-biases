@@ -250,7 +250,7 @@ def maml(model, train_set, dev_set, max_epochs=10, lr_inner=0.01, lr_outer=0.001
                     count_since_improved = 0
 
                     # Save the model if its performance has improved
-                    torch.save(model.state_dict(), save_prefix + ".weights")
+                    torch.save(model.state_dict(), "../models/" + save_prefix + ".weights")
 
                 else:
                     count_since_improved += 1

@@ -16,7 +16,7 @@ from random import shuffle
 # The output is a list, where each element is one of these descriptors
 # expressed as a list with 3 elements.
 def load_languages(language_file):
-    fi = open(language_file, "r")
+    fi = open("../data/" + language_file, "r")
     lang_list = []
 
     for line in fi:
@@ -41,7 +41,7 @@ def load_languages(language_file):
 # plus a list of the steps (insertions and deletions) needed to 
 # transform that input to that output
 def load_io(io_file):
-    fi = open(io_file, "r")
+    fi = open("../io_correspondences/" + io_file, "r")
 
     io_correspondences = {}
 
@@ -80,7 +80,7 @@ def load_io(io_file):
 #    and constraint ranking
 # Returns a list of all these languages in the dataset
 def load_dataset(dataset_file):
-    fi = open(dataset_file, "r")
+    fi = open("../data/" + dataset_file, "r")
 
     langs = []
     for line in fi:
@@ -105,7 +105,7 @@ def load_dataset(dataset_file):
 
 # Load a simple dataset that consists entirely of C's and V's
 def load_dataset_cv(dataset_file):
-    fi = open(dataset_file, "r")
+    fi = open("../data/" + dataset_file, "r")
 
     langs = []
     for line in fi:

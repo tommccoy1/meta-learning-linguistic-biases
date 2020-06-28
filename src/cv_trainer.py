@@ -24,7 +24,7 @@ maml(cv_model, train_set, dev_set, outer_batch_size=1, lr_inner=1.0,
 
 # Load the saved model
 loaded_model = EncoderDecoder(6,6,10,128)
-loaded_model.load_state_dict(torch.load("cv_model.weights"))
+loaded_model.load_state_dict(torch.load("../models/cv_model.weights"))
 
 # Evaluate it on the test set
 test_acc = average_acc(loaded_model, test_set, lr_inner=0.01, batch_size=100)

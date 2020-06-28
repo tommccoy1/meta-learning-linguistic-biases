@@ -42,7 +42,7 @@ model = EncoderDecoder(args.vocab_size,args.emb_size,args.hidden_size)
 
 # If you need a randomly-initialized model, save the model as-is, with no further training
 if args.method == "random":
-    torch.save(model.state_dict(), args.save_prefix + ".weights")
+    torch.save(model.state_dict(), "../models/" + args.save_prefix + ".weights")
 
 # If meta-training, meta-train the model
 # The weights are saved inside the maml() function

@@ -140,12 +140,12 @@ train_set = []
 dev_set = []
 test_set = []
 
-fo_train = open(args.output_prefix + ".train", "w")
-fo_dev = open(args.output_prefix + ".dev", "w")
-fo_test = open(args.output_prefix + ".test", "w")
+fo_train = open("../data/" + args.output_prefix + ".train", "w")
+fo_dev = open("../data/" + args.output_prefix + ".dev", "w")
+fo_test = open("../data/" + args.output_prefix + ".test", "w")
 
 if args.implication_type == "one":
-    for line in open("imp_show_one.txt", "r"):
+    for line in open("../data/imp_show_one.txt", "r"):
         parts = line.strip().split("\t")
         ranking = [int(x) for x in parts[0].split(",")]
         train_abstract = parts[1]
@@ -163,7 +163,7 @@ if args.implication_type == "one":
         test_set.append(task)
 
 elif args.implication_type == "three":
-    for line in open("imp_withhold_one.txt", "r"):
+    for line in open("../data/imp_withhold_one.txt", "r"):
         parts = line.strip().split("\t")
         ranking = [int(x) for x in parts[0].split(",")]
         test_abstract = parts[1]
