@@ -1,6 +1,6 @@
 # Universal linguistic inductive biases via meta-learning
 
-This is the code for the paper "Universal linguistic inductive biases via meta-learning" by Tom McCoy, Erin Grant, Paul Smolensky, Tom Griffiths, and Tal Linzen. The paper can be found here, with an accompanying demo here.
+This is the code for the paper "Universal linguistic inductive biases via meta-learning" by [Tom McCoy](http://rtmccoy.com/), [Erin Grant](https://eringrant.github.io/), [Paul Smolensky](https://www.microsoft.com/en-us/research/people/psmo/), [Tom Griffiths](http://cocosci.princeton.edu/tom/index.php), and [Tal Linzen](https://tallinzen.net/). The paper can be found here, with an accompanying demo [here](http://rtmccoy.com/meta-learning-linguistic-biases.html).
 
 Below are instructions for running our code. All scripts should be run in the `src/` directory.
 
@@ -321,6 +321,16 @@ Constraint sets:
 - yonc: YesOnset, NoCoda (default constraints)
 - yoyc: YesOnset, YesCoda
 
+## License
 
+This code is licensed under an [MIT license](https://github.com/tommccoy1/meta-learning-linguistic-biases/blob/master/LICENSE).
+
+## Citing
+
+If you make use of this code, please cite the following ([bibtex](https://tommccoy1.github.io/metaug_js/metaug_bib.html)):
+
+R. Thomas McCoy, Erin Grant, Paul Smolensky, Thomas L. Griffiths, and Tal Linzen.  2020. Universal linguistic inductive biases via meta-learning.  In *Proceedings of the 42nd Annual Conference of the Cognitive Science Society*. 
+
+*Questions? Comments? Email [tom.mccoy@jhu.edu](mailto:tom.mccoy@jhu.edu).*
 
 
