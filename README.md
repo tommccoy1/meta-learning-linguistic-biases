@@ -58,12 +58,12 @@ python train_dev_test_split.py --output_prefix nonc --constraints nonc
 ## Step 2: Expanding keys out into datasets
 Step 1 generated keys for datasets; in this step, we expand those keys into datasets. Each of these lines of code should generate a meta-training set in `data/PREFIX.train`, a meta-dev set in `data/PREFIX.dev`, and a meta-test set in `data/PREFIX.test`, where `PREFIX` is given by the `--output_prefix` argument. This works by expanding out the keys in the `data/` directory into full datasets.
 
-(A) Tasks used for meta-training and meta-testing:
+### (A) Tasks used for meta-training and meta-testing:
 ```
 python make_tasks.py --ranking_prefix yonc --output_prefix yonc --constraints yonc
 ```
 
-(B) Tasks used for ease-of-learning evaluations with different constraint sets:
+#### (B) Tasks used for ease-of-learning evaluations with different constraint sets:
 ```
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yonc --output_prefix yonc_10per --constraints yonc
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yoyc --output_prefix yoyc_10per --constraints yoyc
