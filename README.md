@@ -18,7 +18,7 @@ The first line creates the data to use for meta-training, then the second line e
 
 ## Overview of this repo
 
-The models that we evaluate in the paper are in `saved_weights`, while keys that can be used to generate our meta-training and evaluation sets are in `data/`. All of our code is in `src/`; here is a description of the files there:
+The models that we evaluate in the paper are in `saved_weights/`, while keys that can be used to generate our meta-training and evaluation sets are in `data/`. All of our code is in `src/`; here is a description of the files there:
 - `cv_trainer.py`: For training a simple example
 - `evaluation.py`: Functions for evaluation
 - `input_output_correspondences.py`: Determines what outputs should be given for given types of inputs
@@ -34,7 +34,7 @@ The models that we evaluate in the paper are in `saved_weights`, while keys that
 - `training.py`: Training and meta-training models
 - `utils.py`: Miscellaneous functions
 
-The rest of this README describes how to reproduce the experiments described in our paper. Some of the code is based on this blog post: https://towardsdatascience.com/paper-repro-deep-metalearning-using-maml-and-reptile-fd1df1cc81b0
+The rest of this README describes how to reproduce the experiments described in our paper. Some of the code is based on [this blog post](https://towardsdatascience.com/paper-repro-deep-metalearning-using-maml-and-reptile-fd1df1cc81b0).
 
 ## Part 1: Dataset generation
 
@@ -130,7 +130,7 @@ python main.py --data_prefix yonc --method random --save_prefix random_yonc_256_
 
 ## Part 4: Evaluation
 
-Finally, we evaluate our two models. You may not get exactly the same numbers as what we report here due to the fact that we ran our evaluations on GPUs whose operations are nondeterministic; but the results should be close/
+Finally, we evaluate our two models. You may not get exactly the same numbers as what we report here due to the fact that we ran our evaluations on GPUs whose operations are nondeterministic; but the results should be close.
 
 ### 100-shot learning evaluation
 These are the results discussed on pg. 4 of the paper, second column, paragraph headed "meta-learning results".
@@ -215,6 +215,7 @@ python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 1
 This is the experiment discussed on pg. 5 of the paper, last paragraph in first column continuing into second column; and also in Fig. 4 (bottom right) and Fig. 6c.
 
 1. Meta-initialized model, consistent constraint set: The number reported in the paper is the average of the 4 numbers below (which is 23,248 examples).
+
 Average number of examples needed to learn a language with the consistent constraints YesOnset and NoCoda: 19803.0 examples
 ```
 python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
@@ -241,6 +242,7 @@ python evaluation.py --data_prefix all_shuffle_aio --vocab_size 34 --emb_size 10
 ```
 
 3. Randomly-initialized model, consistent constraint set: The number reported in the paper is the average of the 4 numbers below (which is 78,282 examples).
+
 Average number of examples needed to learn a language with the consistent constraints YesOnset and NoCoda: 74918.5 examples
 ```
 python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
