@@ -130,95 +130,147 @@ python main.py --data_prefix yonc --method random --save_prefix random_yonc_256_
 ## Results of experiments:
 1. 100-shot learning results for meta-initialized and randomly-initialized model (pg. 4 of the paper, second column, paragraph headed "meta-learning results"):
 100-shot results for meta-initialized model (paper reports 98.8%):
+```
 python evaluation.py --data_prefix yonc --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 1.0 --inner_batch_size 100 --save_prefix maml_yonc_256_5
+```
+
 100-shot results for randomly-initialized model (paper reports 6.5%):
+```
 python evaluation.py --data_prefix yonc --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 1.0 --inner_batch_size 100 --save_prefix random_yonc_256_5
+```
 
 2. Ease of learning: Set of constraints: (pg. 4 of the paper, second column, first 4 paragraphs under "Ease of Learning"; also, Figure 4 top, Figure 5, and Figure 6a):
 MAML, yonc: 203.75 
+```
 python evaluation.py --data_prefix yonc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 MAML, nonc: 791.11
+```
 python evaluation.py --data_prefix nonc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 MAML, yoyc: 1112.0 
+```
 python evaluation.py --data_prefix yoyc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 MAML, noyc: 1505.0
+```
 python evaluation.py --data_prefix noyc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 Random, yonc: 20642.5
+```
 python evaluation.py --data_prefix yonc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95 
+```
 Random, nonc: 25577.67
+```
 python evaluation.py --data_prefix nonc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 Random, yoyc: 25447.8
+```
 python evaluation.py --data_prefix yoyc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 Random, noyc: 24647.38  
+```
 python evaluation.py --data_prefix noyc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 3. Ease of learning: Consistent constraint ranking (pg. 5 of the paper, first column, first 2 full paragraphs; also Fig. 4, bottom left, and Fig. 6b):
 MAML, consistent ranking: 203.75 (same as first line in Ease of Learning):
+```
 python evaluation.py --data_prefix yonc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 MAML, inconsistent ranking: 19803.0
+```
 python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 
 Random, consistent ranking: 20642.5 (same as above)
+```
 python evaluation.py --data_prefix yonc_10per --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 Random, inconsistent ranking: 74918.5
+```
 python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 4. Ease of learning: Consistent set of constraints (pg. 5 of the paper, last paragraph in first column continuing into second column; also Fig. 4, bottom right, and Fig. 6c):
 MAML, consistent constraint set:
 YONC: 19803.0
+```
 python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 NONC: 8721.0
+```
 python evaluation.py --data_prefix nonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 YOYC: 29866.0 
+```
 python evaluation.py --data_prefix yoyc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 NOYC: 34603.875
+```
 python evaluation.py --data_prefix noyc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 Average: 23,248
 
 MAML, inconsistent constraint set: 33135.125
+```
 python evaluation.py --data_prefix all_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 Random, consistent constraint set:
 YONC: 74918.5
+```
 python evaluation.py --data_prefix yonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 NONC: 72906.56
+```
 python evaluation.py --data_prefix nonc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 YOYC: 84942.1
+```
 python evaluation.py --data_prefix yoyc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 NOYC: 80360.75 
+```
 python evaluation.py --data_prefix yoyc_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 Average: 78,282
 
 Random, inconsistent constraint set: 87370.63
+```
 python evaluation.py --data_prefix all_shuffle_aio --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 
 5. Poverty of the stimulus: All new phonemes (pg. 5 of the paper, 2nd column; also Fig. 7, left):
 MAML: Unseen types: 0.837
+```
 python evaluation.py --data_prefix pos_new_phonemes --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 
 Random: Unseen types: 0.045 
+```
 python evaluation.py --data_prefix pos_new_phonemes --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 6. Poverty of the stimulus: Length 5 (pg. 6 of the paper, first full paragraph; also Fig 7, middle):
 MAML: Length 5: 0.897
+```
 python evaluation.py --data_prefix pos_length --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+```
 MAML: Length 6: 0.504 NOTE: Different from paper (different seed)
+```
 python evaluation.py --data_prefix pos_length6 --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 
 Random: Length 5: 0.59
+```
 python evaluation.py --data_prefix pos_length --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-
+```
 7. Poverty of the stimulus: Implicational universals (pg. 6 of the paper, last paragraph before the conclusion; also Fig. 6, right):
 MAML: 0.926
+```
 python evaluation.py --data_prefix pos_imp --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100 --eval_technique converge --threshold 0.95
-
+```
 Random: 0.100
+```
 python evaluation.py --data_prefix pos_imp --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100 --eval_technique converge --threshold 0.95
-  
+```  
 All code should be run in the `src` directory.
 
 
