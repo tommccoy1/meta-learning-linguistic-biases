@@ -92,7 +92,7 @@ for ranking in rankings:
     all_input_outputs[tuple(ranking)] = io_list
 
 # Now save the input-output correspondences that we have computed
-fo = open(args.prefix + "io_correspondences.txt", "w")
+fo = open("../io_correspondences/" + args.prefix + "io_correspondences.txt", "w")
 
 for key in all_input_outputs:
     key_string = ",".join([str(x) for x in key])

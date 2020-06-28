@@ -47,11 +47,13 @@ Constraint sets:
 
 ## Replicating dataset generation
 1. Create files specifying input-output correspondences for each constraint set. For "YesOnset, NoCoda" we further generate an additional file expanding out to input length 6.
+```
 python input_output_correspondences.py --onset yes --coda yes --prefix yo_yc_ --max_input_length 5
 python input_output_correspondences.py --onset yes --coda no --prefix yo_nc_ --max_input_length 5
 python input_output_correspondences.py --onset no --coda yes --prefix no_yc_ --max_input_length 5
 python input_output_correspondences.py --onset no --coda no --prefix no_nc_ --max_input_length 5
 python input_output_correspondences.py --onset yes --coda no --prefix yo_nc_ --max_input_length 6
+```
 
 2. Create keys that will be used to generate non-overlapping meta-training languages, meta-dev languages, and meta-test languages. Again, we do this once for each of the four constraint sets.
 python train_dev_test_split.py --output_prefix yonc --constraints yonc
