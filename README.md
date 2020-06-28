@@ -69,6 +69,38 @@ python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_p
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix noyc --output_prefix noyc_10per --constraints noyc
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix nonc --output_prefix nonc_10per --constraints nonc
 
+3. Tasks used for inconsistent constraint rankings or constraint sets
+python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yonc --output_prefix yonc_shuffle_aio --constraints yonc --aio_shuffle yo_nc_io_correspondences.txt
+python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yonc --output_prefix all_shuffle_aio --constraints yonc --aio_shuffle no_nc_io_correspondences.txt,no_yc_io_correspondences.txt,yo_nc_io_correspondences.txt,yo_yc_io_correspondences.txt
+
+python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000
+--n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0
+--n_test_tasks_per_ranking 10 --output_prefix yoyc_shuffle_aio
+--ranking_prefix yoyc --constraints yoyc --aio_shuffle
+yo_yc_io_correspondences.txt
+
+python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000
+--n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0
+--n_test_tasks_per_ranking 10 --output_prefix noyc_shuffle_aio
+--ranking_prefix noyc --constraints noyc --aio_shuffle
+no_yc_io_correspondences.txt
+
+python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000
+--n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0
+--n_test_tasks_per_ranking 10 --output_prefix nonc_shuffle_aio
+--ranking_prefix nonc --constraints nonc --aio_shuffle
+no_nc_io_correspondences.txt
+
+4. Tasks for POS: all new
+python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --ranking_prefix yonc --constraints yonc --output_prefix yonc_test_all_new_conv --test_all_new True --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10
+
+5. Tasks for POS: length
+python make_tasks_imp.py --n_train 20000 --n_dev 500 --n_test 1000 --output_prefix imp_length --constraints yonc --implication_type length
+python make_tasks_imp.py --n_train 20000 --n_dev 500 --n_test 1000 --output_prefix imp_length6 --constraints yonc --implication_type length6
+
+6. Tasks for POS: implicational universals
+python make_tasks_imp.py --n_train 20000 --n_dev 500 --n_test 1000 --output_prefix imp_show_one --constraints yonc --implication_type one
+
 ## Meta-train a model
 python main.py --data_prefix yonc --method maml --save_prefix maml_yonc_256_5
 python main.py --data_prefix yonc --method random --save_prefix random_yonc_256_5
@@ -151,5 +183,18 @@ python evaluation.py --data_prefix yonc_test_all_new_conv --vocab_size 34 --emb_
 6. Poverty of the stimulus: Length 5 (pg. 6 of the paper, first full paragraph; also Fig 7, middle):
 MAML: Length 5: 0.897
 python evaluation.py --data_prefix imp_length --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
-MAML: Length 6:
+MAML: Length 6: 0.504 NOTE: Different from paper (different seed)
+python evaluation.py --data_prefix length6 --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+
+
+Random: Length 5: 0.59
+python evaluation.py --data_prefix imp_length --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100000000 --eval_technique converge --threshold 0.95
+
+7. Poverty of the stimulus: Implicational universals (pg. 6 of the paper, last paragraph before the conclusion; also Fig. 6, right):
+MAML: 0.926
+python evaluation.py --data_prefix imp_show_one --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix maml_yonc_256_5 --print_every 10 --patience 100 --eval_technique converge --threshold 0.95
+
+Random: 0.100
+python evaluation.py --data_prefix imp_show_one --vocab_size 34 --emb_size 10 --hidden_size 256 --lr_inner 0.001 --inner_batch_size 10 --save_prefix random_yonc_256_5 --print_every 10 --patience 100 --eval_technique converge --threshold 0.95
+  
 

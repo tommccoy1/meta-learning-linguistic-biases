@@ -124,8 +124,9 @@ for index, ranking in enumerate(rankings):
     inv_ranking_dict[tuple(ranking)] = index
     ranking_dict[index] = tuple(ranking)
 
-
-if args.constraints == "nonc":
+if args.output_prefix == "length6":
+    all_input_outputs = load_io("yo_nc_6_io_correspondences.txt")
+elif args.constraints == "nonc":
     all_input_outputs = load_io("no_nc_io_correspondences.txt")
 elif args.constraints == "noyc":
     all_input_outputs = load_io("no_yc_io_correspondences.txt")
@@ -234,6 +235,20 @@ elif args.implication_type == "length":
             task = make_task(ranking, all_input_outputs, n_train=args.n_train, n_dev=args.n_dev, n_test=args.n_test, abstract_input_filter_small=train_filter_function, abstract_input_filter_med=test_filter_function, abstract_input_filter_large=train_filter_function, abstract_output_filter_small=blank_f, abstract_output_filter_med=blank_f, abstract_output_filter_large=blank_f, input_filter_small=blank_f, input_filter_med=blank_f, input_filter_large=blank_f, output_filter_small=blank_f, output_filter_med=blank_f, output_filter_large=blank_f)
 
             test_set.append(task)
+
+elif args.implication_type == "length6":
+    for ranking in rankings:
+        for i in range(10):
+            train_filter_function = filtering_function(allowed_lengths=[0,1,2,3,4,5])
+            test_filter_function = filtering_function(allowed_lengths=[6])
+
+            blank_f = filtering_function()
+
+
+            task = make_task(ranking, all_input_outputs, n_train=args.n_train, n_dev=args.n_dev, n_test=args.n_test, abstract_input_filter_small=train_filter_function, abstract_input_filter_med=test_filter_function, abstract_input_filter_large=train_filter_function, abstract_output_filter_small=blank_f, abstract_output_filter_med=blank_f, abstract_output_filter_large=blank_f, input_filter_small=blank_f, input_filter_med=blank_f, input_filter_large=blank_f, output_filter_small=blank_f, output_filter_med=blank_f, output_filter_large=blank_f)
+
+            test_set.append(task)
+
 
 
 
