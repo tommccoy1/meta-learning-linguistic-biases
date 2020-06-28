@@ -4,6 +4,10 @@ This is the code for the paper "Universal linguistic inductive biases via meta-l
 
 Below are instructions for running our code. All scripts should be run in the `src/` directory.
 
+## Dependencies
+
+This code requires [PyTorch](https://pytorch.org/get-started/locally/). We used version 1.0.0 for our experiments, but the code should also be compatible with newer versions.
+
 ## Mini example
 
 To run a small, simple example of meta-learning, run the following two lines of code:
