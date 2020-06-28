@@ -63,7 +63,7 @@ Step 1 generated keys for datasets; in this step, we expand those keys into data
 python make_tasks.py --ranking_prefix yonc --output_prefix yonc --constraints yonc
 ```
 
-#### (B) Tasks used for ease-of-learning evaluations with different constraint sets:
+### (B) Tasks used for ease-of-learning evaluations with different constraint sets:
 ```
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yonc --output_prefix yonc_10per --constraints yonc
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yoyc --output_prefix yoyc_10per --constraints yoyc
@@ -71,7 +71,7 @@ python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_p
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix nonc --output_prefix nonc_10per --constraints nonc
 ```
 
-(C) Tasks used for ease-of-learning evaluations with inconsistent constraint rankings or constraint sets
+### (C) Tasks used for ease-of-learning evaluations with inconsistent constraint rankings or constraint sets
 ```
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yonc --output_prefix yonc_shuffle_aio --constraints yonc --aio_shuffle yo_nc_io_correspondences.txt
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --output_prefix yoyc_shuffle_aio --ranking_prefix yoyc --constraints yoyc --aio_shuffle yo_yc_io_correspondences.txt
@@ -80,21 +80,22 @@ python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_p
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10 --ranking_prefix yonc --output_prefix all_shuffle_aio --constraints yonc --aio_shuffle no_nc_io_correspondences.txt,no_yc_io_correspondences.txt,yo_nc_io_correspondences.txt,yo_yc_io_correspondences.txt
 ```
 
-(E) Tasks used for the poverty-of-the-stimulus evaluation with all new phonemes
+### (D) Tasks used for the poverty-of-the-stimulus evaluation with all new phonemes
 ```
 python make_tasks.py --n_train 20000 --n_dev 500 --n_test 1000 --ranking_prefix yonc --constraints yonc --output_prefix pos_new_phonemes --test_all_new True --n_train_tasks_per_ranking 0 --n_dev_tasks_per_ranking 0 --n_test_tasks_per_ranking 10
 ```
 
-(F) Tasks used for the poverty-of-the-stimulus evaluation of generalization to a novel length
+### (E) Tasks used for the poverty-of-the-stimulus evaluation of generalization to a novel length
 ```
 python make_tasks_imp.py --n_train 20000 --n_dev 500 --n_test 1000 --output_prefix pos_length --constraints yonc --implication_type length
 python make_tasks_imp.py --n_train 20000 --n_dev 500 --n_test 1000 --output_prefix pos_length6 --constraints yonc --implication_type length6
 ```
 
-(G) Tasks for the poverty-of-the-stimulus evaluation with implicational universals
+### (F) Tasks for the poverty-of-the-stimulus evaluation with implicational universals
 ```
 python make_tasks_imp.py --n_train 20000 --n_dev 500 --n_test 1000 --output_prefix pos_imp --constraints yonc --implication_type one
 ```
+### Verifying that the datasets were generated properly
 
 The above lines of code should exactly recreate the datasets that we used in the paper because the random seed has been set to ensure replicability. To verify that this is working properly, here are some checks you can perform on `yonc.train`, `yonc.dev`, and `yonc.test`, which are the outputs of (A):
 
@@ -111,13 +112,16 @@ juEf,.ju.Ef. Oufu,.O.u.fu. EuEOz,.E.u.E.Oz. , ujOz,.u.jOz. OufOO,.O.u.fO.O. fEu,
 In addition, the exact `yonc.dev` and `yonc.test` files have been provided in `data/`, as `yonc_original.dev` and `yonc_original.test`, so that you can check if your generated `yonc.dev` matches `yonc_original.dev` and that your generated `yonc.test` matches `yonc_original.test`.
 
 
-## Meta-train a model
-Meta-train a model using `yonc.train` as the meta-training set, `yonc.dev` as the meta-dev set, and `yonc.test` as the meta-test set, then save its weights to `models/maml_yonc_256_5.weights`.
+## Step 3: Create model initializations randomly or with meta-learning
+
+In this step, we create the two model initializations that we perform our evaluations on. You can skip this step if you want, because the exact initializations that we used in the paper have been provided under `models/`. Be aware that running meta-training can take a long time (several days).
+
+1. Meta-train a model using `yonc.train` as the meta-training set, `yonc.dev` as the meta-dev set, and `yonc.test` as the meta-test set, then save its weights to `models/maml_yonc_256_5.weights`.
 ```
 python main.py --data_prefix yonc --method maml --save_prefix maml_yonc_256_5
 ```
 
-Save a randomly-initialized model's weights to `models/random_yonc_256_5`.
+2. Save a randomly-initialized model's weights to `models/random_yonc_256_5`.
 ```
 python main.py --data_prefix yonc --method random --save_prefix random_yonc_256_5
 ```
