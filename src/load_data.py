@@ -112,10 +112,11 @@ def load_dataset_cv(dataset_file):
         parts = line.strip().split("\t")
         
         train_set = [elt.split(",") for elt in parts[0].split()]
-        test_set = [elt.split(",") for elt in parts[1].split()]
-        vocab = parts[2].split()
+        dev_set = [elt.split(",") for elt in parts[1].split()]
+        test_set = [elt.split(",") for elt in parts[2].split()]
+        vocab = parts[3].split()
 
-        langs.append([train_set, test_set, vocab])
+        langs.append([train_set, dev_set, test_set, vocab])
 
     return langs
 

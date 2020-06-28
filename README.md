@@ -1,39 +1,40 @@
-# MAML for Universal Grammar
+# Universal linguistic inductive biases via meta-learning
+
+This is the code for the paper "Universal linguistic inductive biases via meta-learning" by Tom McCoy, Erin Grant, Paul Smolensky, Tom Griffiths, and Tal Linzen. The paper can be found here, with an accompanying demo here.
+
+Below are instructions for running our code. All scripts should be run in the `src/` directory.
+
+## Mini example
+
+To run a small, simple example of meta-learning, run the following two lines of code:
+
+```
+python make_tasks_cv.py
+python cv_trainer.py
+```
+
+The first line creates the data to use for meta-training, then the second line executes the meta-training. The second line will output the model's few-shot accuracy on the meta-dev set after every 100 meta-training examples; if everything is working correctly, you should see such an output roughly every 5 or 10 minutes, and the accuracy should be increasing as time goes on. 
 
 
-## Saved models
+## Overview of this repo
 
-Are in saved_weights
+The models that we evaluate in the paper are in `saved_weights`, while keys that can be used to generate our meta-training and evaluation sets are in `data/`. All of our code is in `src/`; here is a description of the files there:
+- `cv_trainer.py`: For training a simple example
+- `evaluation.py`: Functions for evaluation
+- `input_output_correspondences.py`: Determines what outputs should be given for given types of inputs
+- `load_data.py`: Functions for loading data
+- `main.py`: For meta-training models
+- `make_tasks.py`: For generating meta-training, meta-validation, and meta-test tasks from keys.
+- `make_tasks_cv.py`: For generating tasks to use in the mini example
+- `make_tasks_imp.py`: For generating certain evaluation sets
+- `mix_input_outputs.py`: Tools for generating some of the evaluation sets
+- `models.py`: Definitions of the PyTorch models we use
+- `phonology_task_creation.py`: Functions for use in generating tasks
+- `train_dev_test_split.py`: Creating meta-training, meta-validation, and meta-test splits that do not overlap
+- `training.py`: Training and meta-training models
+- `utils.py`: Miscellaneous functions
 
-
-Important files:
-- models.py: Defines the models
-- training.py: Defines MAML for PyTorch
-- cv.train, cv.dev, cv.test: Datasets for the simple task I used to debug
-- cv_trainer.py: Script to run MAML on this simple task
-
-Most of the other stuff in here is for generating the datasets.
-
-
-## Scripts
-input_output_correspondences.py: Computes optimal output for each type of input and saves that (much faster than computing OT outputs on the fly for every word).
-load_data.py: functions for loading saved data
-cv_trainer.py: Simple quickstart
-main.py: Code for meta-training a model (or saving a random set of weights)
-phonology_task_creation.py: Generating tasks based on a constraint ranking
-models.py: Definitions for our PyTorch models
-training.py: Code for training or meta-training models
-utils.py: Miscellaneous functions
-train_dev_test_split.py: Generating a set of meta-training languages, a set of meta-test languages, and a set of meta-dev languages.
-mix_input_outputs.py: Creating input/output correspondeces that draw randomly from multiple different constraint rankings, or from multiple constraint sets and constraint rankings
-make_tasks_cv.py: Expand out a list of keys into full datasets for the simple CV case
-make_tasks_imp.py: Create tasks that test for some implicational universal
-make_tasks.py: Expand out a list of keys into full datasets for our real case
-
-Some of the code is based on this blog post: https://towardsdatascience.com/paper-repro-deep-metalearning-using-maml-and-reptile-fd1df1cc81b0
-
-
-All code should be run in the `src` directory.
+The rest of this README describes how to reproduce the experiments described in our paper. Some of the code is based on this blog post: https://towardsdatascience.com/paper-repro-deep-metalearning-using-maml-and-reptile-fd1df1cc81b0
 
 ## Part 1: Dataset generation
 

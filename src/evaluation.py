@@ -39,7 +39,7 @@ test_set = load_dataset(args.data_prefix + ".test")
 
 # Load the model to be evaluated
 model = EncoderDecoder(args.vocab_size,args.emb_size,args.hidden_size)
-model.load_state_dict(torch.load("../models/" + args.save_prefix + ".weights"))
+model.load_state_dict(torch.load("../saved_weights/" + args.save_prefix + ".weights"))
 
 # Evaluate the model on its few-shot accuracy on the specified test languagers
 if args.eval_technique == "meta":
