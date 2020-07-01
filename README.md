@@ -1,6 +1,6 @@
 # Universal linguistic inductive biases via meta-learning
 
-This is the code for the paper "Universal linguistic inductive biases via meta-learning" by [Tom McCoy](http://rtmccoy.com/), [Erin Grant](https://eringrant.github.io/), [Paul Smolensky](https://www.microsoft.com/en-us/research/people/psmo/), [Tom Griffiths](http://cocosci.princeton.edu/tom/index.php), and [Tal Linzen](https://tallinzen.net/). The paper can be found here, with an accompanying demo [here](http://rtmccoy.com/meta-learning-linguistic-biases.html).
+This is the code for the paper "Universal linguistic inductive biases via meta-learning" by [Tom McCoy](http://rtmccoy.com/), [Erin Grant](https://eringrant.github.io/), [Paul Smolensky](https://www.microsoft.com/en-us/research/people/psmo/), [Tom Griffiths](http://cocosci.princeton.edu/tom/index.php), and [Tal Linzen](https://tallinzen.net/). The paper can be found [here](https://arxiv.org/pdf/2006.16324.pdf), with an accompanying demo [here](http://rtmccoy.com/meta-learning-linguistic-biases.html).
 
 Below are instructions for running our code. All scripts should be run in the `src/` directory.
 
@@ -311,6 +311,10 @@ Constraint sets:
 - noyc: NoOnset, YesCoda
 - yonc: YesOnset, NoCoda (default constraints)
 - yoyc: YesOnset, YesCoda
+
+## Meta-learning on your own data
+
+This code is not currently configured to be easily extended to new datasets. We are hoping to update it to make it more general, but in the meantime feel free to contact us if you want some pointers on how to adapt it to your data.
 
 ## License
 
